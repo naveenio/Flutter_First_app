@@ -1,5 +1,6 @@
 // main_screen.dart
 import 'package:flutter/material.dart';
+import 'package:test_app/screens/video_screen.dart';
 import 'home_screen.dart';
 import 'port_screen.dart';
 import 'vlc_screen.dart';
@@ -19,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     VlcScreen(),
     ProfileScreen(),
     PortPage(),
-    // VideoScreen(),
+    VideoScreen(),
   ];
 
   void _onItemTapped(int index) {

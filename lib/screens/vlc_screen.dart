@@ -32,7 +32,17 @@ class _VlcScreenState extends State<VlcScreen> {
     vlcController.play();
   }
 
-  @override
+  void stopStream() {
+    vlcController.stop();
+    vlcController.setMediaFromNetwork('');
+  }
+
+  void pauseStream(String url) {
+    vlcController.pause();
+    vlcController.setMediaFromNetwork(url);
+  }
+
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -70,6 +80,37 @@ class _VlcScreenState extends State<VlcScreen> {
               child: const Text('Play Stream'),
             ),
             const SizedBox(height: 16),
+            // Add row of control buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    final url = httpController.text.isNotEmpty
+                        ? httpController.text
+                        : rtspController.text;
+                    if (url.isNotEmpty) {
+                      playStream(url);
+                    }
+                  },
+                  icon: const Icon(Icons.play_arrow),
+                  tooltip: 'Play',
+                ),
+                IconButton(
+                  onPressed: () async {
+                    vlcController.pause();
+                  },
+                  icon: const Icon(Icons.pause),
+                  tooltip: 'Pause',
+                ),
+                IconButton(
+                  onPressed: stopStream,
+                  icon: const Icon(Icons.stop),
+                  tooltip: 'Stop',
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: VlcPlayer(
                 controller: vlcController,
@@ -83,7 +124,6 @@ class _VlcScreenState extends State<VlcScreen> {
     );
   }
 }
-
 
 // https://media.w3.org/2010/05/sintel/trailer.mp4
 // rtsp://admin:hikvision nvr@192.168.20.36
