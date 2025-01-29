@@ -1,5 +1,6 @@
 // main_screen.dart
 import 'package:flutter/material.dart';
+import 'multiple_stream.dart';
 import 'package:test_app/screens/video_screen.dart';
 import 'home_screen.dart';
 import 'port_screen.dart';
@@ -13,12 +14,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 2; // Start with home screen (center)
+  int _selectedIndex = 2; 
 
   final List<Widget> _screens = [
     HomeScreen(),
     VlcScreen(),
-    ProfileScreen(),
+    multiplescreen(),
     PortPage(),
     VideoScreen(),
   ];

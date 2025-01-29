@@ -9,100 +9,103 @@ class VlcScreen extends StatefulWidget {
 }
 
 class _VlcScreenState extends State<VlcScreen> {
-  final TextEditingController httpController = TextEditingController();
-  final TextEditingController rtspController = TextEditingController();
+  final TextEditingController textController = TextEditingController();
+  bool _isPlaying = false;
   late VlcPlayerController vlcController;
 
   @override
   void initState() {
     super.initState();
-    vlcController = VlcPlayerController.network('', autoPlay: false);
+    vlcController = VlcPlayerController.network(
+      '', 
+      autoPlay: false,
+      options: VlcPlayerOptions(),
+    );
+    
   }
+
+
+  
 
   @override
   void dispose() {
-    httpController.dispose();
-    rtspController.dispose();
+    
+    textController.dispose();
     vlcController.dispose();
     super.dispose();
   }
 
-  void playStream(String url) {
-    vlcController.setMediaFromNetwork(url);
-    vlcController.play();
+  Future<void> playStream(String url) async {
+    try {
+      await vlcController.setMediaFromNetwork(url);
+      await vlcController.play();
+      setState(() {
+        _isPlaying = true;
+      });
+    } catch (e) {
+      print('Error starting stream: $e');
+    }
   }
 
-  void stopStream() {
-    vlcController.stop();
-    vlcController.setMediaFromNetwork('');
+  Future<void> stopStream() async {
+    await vlcController.stop();
+    setState(() {
+      _isPlaying = false;
+    });
   }
 
-  void pauseStream(String url) {
-    vlcController.pause();
-    vlcController.setMediaFromNetwork(url);
-  }
-
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('VLC Screen'),
+        title: const Text('Single Stream Screen'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              controller: httpController,
+              controller: textController,
               decoration: const InputDecoration(
-                labelText: 'HTTP Stream URL',
+                labelText: 'Stream URL',
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: rtspController,
-              decoration: const InputDecoration(
-                labelText: 'RTSP Stream URL',
-                border: OutlineInputBorder(),
-              ),
-            ),
+            
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                final url = httpController.text.isNotEmpty
-                    ? httpController.text
-                    : rtspController.text;
+              onPressed: () async {
+                final url = textController.text;
                 if (url.isNotEmpty) {
-                  playStream(url);
+                  await playStream(url);
                 }
               },
               child: const Text('Play Stream'),
             ),
             const SizedBox(height: 16),
-            // Add row of control buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                  onPressed: () async {
-                    final url = httpController.text.isNotEmpty
-                        ? httpController.text
-                        : rtspController.text;
-                    if (url.isNotEmpty) {
-                      playStream(url);
+                  onPressed: () {
+                    setState(() {
+                      _isPlaying = !_isPlaying;
+                    });
+                    if (_isPlaying) {
+                      vlcController.play();
+                    } else {
+                      vlcController.pause();
                     }
                   },
-                  icon: const Icon(Icons.play_arrow),
+                
+                  icon: Icon( _isPlaying?Icons.pause:Icons.play_arrow),
                   tooltip: 'Play',
                 ),
-                IconButton(
-                  onPressed: () async {
-                    vlcController.pause();
-                  },
-                  icon: const Icon(Icons.pause),
-                  tooltip: 'Pause',
-                ),
+                // IconButton(
+                //   onPressed: () => vlcController.pause(),
+                //   icon: const Icon(Icons.pause),
+                //   tooltip: 'Pause',
+                // ),
                 IconButton(
                   onPressed: stopStream,
                   icon: const Icon(Icons.stop),
@@ -112,10 +115,20 @@ class _VlcScreenState extends State<VlcScreen> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: VlcPlayer(
-                controller: vlcController,
-                aspectRatio: 16 / 9,
-                placeholder: const Center(child: CircularProgressIndicator()),
+              child: GestureDetector(
+                onTap: ()  {
+                  
+                  if (_isPlaying) {
+                     vlcController.pause();
+                  } else {
+                     vlcController.play();
+                  }
+                },
+                child: VlcPlayer(
+                  controller: vlcController,
+                  aspectRatio: 16 / 9,
+                  placeholder: const Center(child: CircularProgressIndicator()),
+                ),
               ),
             ),
           ],
