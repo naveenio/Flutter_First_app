@@ -1,14 +1,16 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
-class multiplescreen extends StatefulWidget {
-  const multiplescreen({super.key});
+class StreamIso extends StatefulWidget {
+  const StreamIso({super.key});
 
   @override
-  State<multiplescreen> createState() => _multiplescreenState();
+  State<StreamIso> createState() => _StreamIsoState();
 }
 
-class _multiplescreenState extends State<multiplescreen> {
+class _StreamIsoState extends State<StreamIso> {
   final TextEditingController _urlController = TextEditingController();
   List<VlcPlayerController> _vlcControllers = [];
   List<String> _streamUrls = [];
@@ -18,18 +20,16 @@ class _multiplescreenState extends State<multiplescreen> {
   void _addStream(String url) {
     if (url.isEmpty) return;
 
-    final newController = VlcPlayerController.network(
-      url,
-      autoPlay: true,
-      options: VlcPlayerOptions(),
-    );
-
-    setState(() {
-      _vlcControllers.add(newController);
-      _streamUrls.add(url);
+    final receivePort = ReceivePort();
+    Isolate.spawn(complexTask, (url: url, sendPort: receivePort.sendPort));
+    receivePort.listen((newController) {
+      debugPrint('Result 3: $newController');
+      setState(() {
+        _vlcControllers.add(newController);
+        _streamUrls.add(url);
+      });
     });
   }
-
   // void _removeStream(int index) {
   //   setState(() {
   //     _vlcControllers[index].dispose();
@@ -62,7 +62,7 @@ class _multiplescreenState extends State<multiplescreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Multi-Stream Player'),
+        title: const Text('Isolate -Stream Player'),
       ),
       body: Column(
         children: [
@@ -161,4 +161,14 @@ class _multiplescreenState extends State<multiplescreen> {
       await _vlcControllers[index].stop();
     } else {}
   }
+}
+
+complexTask(({String url, SendPort sendPort}) data) {
+  final newController = VlcPlayerController.network(
+    data.url,
+    autoPlay: true,
+    options: VlcPlayerOptions(),
+  );
+
+  data.sendPort.send(newController);
 }

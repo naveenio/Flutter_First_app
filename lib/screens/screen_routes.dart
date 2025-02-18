@@ -1,5 +1,8 @@
 // main_screen.dart
 import 'package:flutter/material.dart';
+import 'package:test_app/screens/isolate_practice.dart';
+import 'package:test_app/screens/stream_isolate.dart';
+// import 'stream_isolate.txt';
 import 'multiple_stream.dart';
 import 'package:test_app/screens/video_screen.dart';
 import 'home_screen.dart';
@@ -14,14 +17,14 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 2; 
+  int _selectedIndex = 2;
 
   final List<Widget> _screens = [
-    HomeScreen(),
+    StreamIso(),
     VlcScreen(),
     multiplescreen(),
     PortPage(),
-    VideoScreen(),
+    VlcScreen(),
   ];
 
   void _onItemTapped(int index) {

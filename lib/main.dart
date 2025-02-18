@@ -19,3 +19,9 @@ class PublicApisApp extends StatelessWidget {
     );
   }
 }
+
+
+
+// ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Td:\projects-flutter\flutter_isolates_demo\assetsext("Invalid stream URL: $url")),
+//       );

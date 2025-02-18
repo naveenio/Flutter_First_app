@@ -1,0 +1,68 @@
+// stream_manager.dart
+import 'dart:isolate';
+import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+
+class StreamCommand {
+  final String type;
+  final dynamic data;
+  final int? index;
+  
+  StreamCommand(this.type, this.data, {this.index});
+}
+
+class StreamState {
+  final List<String> urls;
+  final List<bool> playingStates;
+
+  List<VlcPlayerController> controllers;
+  
+  StreamState(this.urls, this.playingStates, List<VlcPlayerController> controllers);
+}
+
+void streamManagerIsolate(SendPort uiSendPort) {
+  final receivePort = ReceivePort();
+  uiSendPort.send(receivePort.sendPort);
+  
+  List<VlcPlayerController> controllers = [];
+  List<String> urls = [];
+
+  receivePort.listen((message) {
+    if (message is StreamCommand) {
+      switch (message.type) {
+        case 'add':
+          final url = message.data as String;
+          final controller = VlcPlayerController.network(
+            url,
+            autoPlay: true,
+            options: VlcPlayerOptions(),
+          );
+          controllers.add(controller);
+          urls.add(url);
+          break;
+          
+        case 'remove':
+          final index = message.index!;
+          controllers[index].dispose();
+          controllers.removeAt(index);
+          urls.removeAt(index);
+          break;
+          
+        case 'playPause':
+          final index = message.index!;
+          if (controllers[index].value.isPlaying) {
+            controllers[index].pause();
+          } else {
+            controllers[index].play();
+          }
+          break;
+      }
+      
+      // Sending the updated state back to the UI
+      uiSendPort.send(StreamState(
+        urls,
+        controllers.map((c) => c.value.isPlaying).toList(),
+        controllers,
+      ));
+    }
+  });
+}
