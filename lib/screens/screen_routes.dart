@@ -1,10 +1,11 @@
 // main_screen.dart
 import 'package:flutter/material.dart';
+import 'package:test_app/screens/demov2.dart';
 import 'package:test_app/screens/isolate_practice.dart';
 import 'package:test_app/screens/stream_isolate.dart';
 // import 'stream_isolate.txt';
 import 'multiple_stream.dart';
-import 'package:test_app/screens/video_screen.dart';
+import 'demo.dart';
 import 'home_screen.dart';
 import 'port_screen.dart';
 import 'vlc_screen.dart';
@@ -21,8 +22,8 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     StreamIso(),
-    VlcScreen(),
-    multiplescreen(),
+    Demo(),
+    Demov2(),
     PortPage(),
     VlcScreen(),
   ];
